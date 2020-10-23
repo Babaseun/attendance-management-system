@@ -1,0 +1,23 @@
+﻿Attendance management system API Features
+
+User / Employee
+
+Employee can register [x]
+Employee can login [x]
+
+
+Attendance register []
+
+Employee can fill an attendance register []
+Employee can checkIn []
+Employee can checkOut []
+Employee can see the status/comment for each check Ins and Outs []
+Employee can see the time of each checkIns and checkOuts []
+Employee can see all checkIns and checkOuts []
+
+
+Admin
+
+Admin can change the status/comment for each checkIns and checkOuts []
+Admin can see all checkIns and checkouts []
+Admin can see all checkIns and checkOuts of a particular Employee[]
