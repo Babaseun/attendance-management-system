@@ -1,6 +1,12 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Api.DTOs;
+using Api.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 
@@ -8,12 +14,22 @@ namespace Api.Helpers
 {
     public class Helper
     {
-        public static string GenerateToken(string id, string role)
+        private readonly IConfiguration _configuration;
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public Helper(IConfiguration configuration)
         {
-            var mySecret = "asdv234234^&%&^%&^hjsdfb2%%%";
+            _configuration = configuration;
+        }
+        public Helper(IConfiguration configuration, UserManager<ApplicationUser> userManager)
+        {
+            _configuration = configuration;
+            _userManager = userManager;
+        }
+        public string GenerateToken(string id, string role)
+        {
+            var mySecret = _configuration.GetSection("JWT:SECRET").Value;
             var mySecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(mySecret));
-
-
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -22,12 +38,45 @@ namespace Api.Helpers
                     new Claim("userID", id),
                     new Claim("role", role)
                 }),
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = DateTime.UtcNow.AddMinutes(1),
                 SigningCredentials = new SigningCredentials(mySecurityKey, SecurityAlgorithms.HmacSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+        public Response VerifyToken(HttpContext context)
+        {
+            try
+            {
+                var secret = _configuration.GetSection("JWT:SECRET").Value;
+                var token = context.Request.Headers["Authorization"].ToString().Split(" ")[1];
+                var handler = new JwtSecurityTokenHandler();
+                var decoded = handler.ReadJwtToken(token);
+
+                if (decoded == null) return new Response { Message = "The token provided is invalid" };
+
+                var parameters = new TokenValidationParameters()
+                {
+                    RequireExpirationTime = true,
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secret))
+                };
+                var principal = handler.ValidateToken(token, parameters, out var securityToken).Claims.First();
+
+                var user = _userManager.Users.FirstOrDefault(x => x.Id == principal.Value);
+
+                return user == null ? new Response { Message = "The token provided is invalid" } : new Response { UserId = user.Id, Flagged = true };
+            }
+            catch (IndexOutOfRangeException)
+            {
+                return new Response { Message = "Token not provided", Flagged = false };
+            }
+            catch (Exception e)
+            {
+                return new Response { Message = e.Message };
+            }
         }
     }
 }

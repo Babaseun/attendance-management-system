@@ -1,5 +1,6 @@
 using Api.Data;
 using Api.Models;
+using Api.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -28,9 +29,10 @@ namespace Api
 
             services.AddDbContextPool<AppDbContext>(op =>
             {
-                op.UseSqlServer(Configuration.GetConnectionString("DbConnection"));
+                op.UseSqlite("Data Source=app.db");
             });
             services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>();
+            services.AddScoped<IAttendanceRepository, AttendanceRepository>();
             services.AddControllers();
 
 

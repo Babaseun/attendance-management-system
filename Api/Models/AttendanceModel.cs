@@ -13,7 +13,7 @@ namespace Api.Models
         [Required]
         [MaxLength(30, ErrorMessage = "Only 30 characters are allowed")]
         public string Comment { get; set; } = "pending.....";
-        public bool CheckIn { get; set; } = false;
+        public bool CheckIn { get; set; }
         public bool CheckOut { get; set; } = false;
         public DateTime CheckedInAt { get; set; }
         public DateTime CheckedOutAt { get; set; }
