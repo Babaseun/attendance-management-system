@@ -71,7 +71,7 @@ namespace Api.Helpers
             }
             catch (IndexOutOfRangeException)
             {
-                return new Response { Message = "Token not provided", Flagged = false };
+                return new Response { Message = "Token not provided" };
             }
             catch (Exception e)
             {
