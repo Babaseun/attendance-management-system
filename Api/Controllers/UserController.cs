@@ -23,7 +23,7 @@ namespace Api.Controllers
 
         [Route("register")]
         [HttpPost]
-        public async Task<IActionResult> SignUp(SignUpModel model)
+        public async Task<IionResult> SignUp(SignUpModel model)
         {
             var user = new ApplicationUser
             {
